@@ -1,0 +1,330 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+        }
+        .led-box-shadow {
+            box-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #ffffff, 0 0 40px #ffffff;
+        }
+        .hover-led-box-shadow:hover {
+            box-shadow: 0 0 15px #ffffff, 0 0 30px #ffffff, 0 0 45px #ffffff, 0 0 60px #ffffff;
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <div class="container mx-auto p-4 led-box-shadow">
+        <header class="flex justify-between items-center py-4">
+            <div class="flex items-center">
+                <i class="fas fa-gamepad text-3xl mr-2"></i>
+                <h1 class="text-3xl font-bold">Game Library</h1>
+            </div>
+            <div class="flex items-center">
+                <button id="backToDashboardBtn" class="bg-blue-500 text-black px-4 py-2 rounded led-box-shadow hover-led-box-shadow mr-2">Back to Dashboard</button>
+                <button id="addGameBtn" class="bg-green-500 text-black px-4 py-2 rounded led-box-shadow hover-led-box-shadow">Add Game</button>
+            </div>
+        </header>
+        <main>
+            <div class="flex justify-between items-center mb-4">
+                <input type="text" id="searchInput" class="w-full p-2 rounded bg-gray-700 text-white led-box-shadow hover-led-box-shadow" placeholder="Search games...">
+                <button id="clearSearchBtn" class="bg-red-500 text-black px-4 py-2 rounded ml-2 led-box-shadow hover-led-box-shadow">Clear</button>
+            </div>
+            <div id="gameList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Game items will be appended here -->
+            </div>
+        </main>
+        <footer class="mt-8 py-4 text-center">
+            <p class="text-sm">&copy; 2025 Game Library by Arpit Bajpai. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Modal for adding a new game -->
+    <div id="gameModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden">
+        <div class="bg-gray-800 p-6 rounded-lg led-box-shadow hover-led-box-shadow w-full max-w-md mx-auto">
+            <h2 class="text-2xl mb-4">Add New Game</h2>
+            <form id="gameForm">
+                <div class="mb-4">
+                    <label for="gameTitle" class="block text-sm font-medium">Game Title</label>
+                    <input type="text" id="gameTitle" class="w-full p-2 rounded bg-gray-700 text-white led-box-shadow hover-led-box-shadow" required>
+                </div>
+                <div class="mb-4">
+                    <label for="gameImage" class="block text-sm font-medium">Game Image URL</label>
+                    <input type="url" id="gameImage" class="w-full p-2 rounded bg-gray-700 text-white led-box-shadow hover-led-box-shadow" required>
+                </div>
+                <div class="mb-4">
+                    <label for="gameDescription" class="block text-sm font-medium">Game Description</label>
+                    <textarea id="gameDescription" class="w-full p-2 rounded bg-gray-700 text-white led-box-shadow hover-led-box-shadow" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="gameRating" class="block text-sm font-medium">Game Rating</label>
+                    <input type="number" id="gameRating" class="w-full p-2 rounded bg-gray-700 text-white led-box-shadow hover-led-box-shadow" min="1" max="5" required>
+                </div>
+                <div class="mb-4">
+                    <label for="gameGenre" class="block text-sm font-medium">Game Genre</label>
+                    <input type="text" id="gameGenre" class="w-full p-2 rounded bg-gray-700 text-white led-box-shadow hover-led-box-shadow" required>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancelBtn" class="bg-red-500 text-black px-4 py-2 rounded mr-2 led-box-shadow hover-led-box-shadow">Cancel</button>
+                    <button type="submit" class="bg-green-500 text-black px-4 py-2 rounded led-box-shadow hover-led-box-shadow">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameList = document.getElementById('gameList');
+            const addGameBtn = document.getElementById('addGameBtn');
+            const backToDashboardBtn = document.getElementById('backToDashboardBtn');
+            const gameModal = document.getElementById('gameModal');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const gameForm = document.getElementById('gameForm');
+            const gameTitle = document.getElementById('gameTitle');
+            const gameImage = document.getElementById('gameImage');
+            const gameDescription = document.getElementById('gameDescription');
+            const gameRating = document.getElementById('gameRating');
+            const gameGenre = document.getElementById('gameGenre');
+            const searchInput = document.getElementById('searchInput');
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+            const loadGames = () => {
+                const games = JSON.parse(localStorage.getItem('games')) || [];
+                gameList.innerHTML = '';
+                games.forEach((game, index) => {
+                    const gameItem = document.createElement('div');
+                    gameItem.className = 'bg-gray-800 p-4 rounded-lg led-box-shadow hover-led-box-shadow';
+                    gameItem.innerHTML = `
+                        <img src="${game.image}" alt="Cover image of ${game.title}" class="w-full h-48 object-cover rounded mb-4 led-box-shadow hover-led-box-shadow">
+                        <h3 class="text-xl font-bold mb-2">${game.title}</h3>
+                        <p class="mb-2">${game.description}</p>
+                        <p class="mb-2">Rating: ${game.rating}/5</p>
+                        <p class="mb-2">Genre: ${game.genre}</p>
+                        <div class="flex justify-between items-center">
+                            <button class="bg-red-500 text-black px-4 py-2 rounded led-box-shadow hover-led-box-shadow" onclick="deleteGame(${index})">Delete</button>
+                            <button class="bg-blue-500 text-black px-4 py-2 rounded led-box-shadow hover-led-box-shadow" onclick="editGame(${index})">Edit</button>
+                        </div>
+                    `;
+                    gameList.appendChild(gameItem);
+                });
+            };
+
+            const saveGame = (title, image, description, rating, genre) => {
+                const games = JSON.parse(localStorage.getItem('games')) || [];
+                games.push({ title, image, description, rating, genre });
+                localStorage.setItem('games', JSON.stringify(games));
+                loadGames();
+            };
+
+            const deleteGame = (index) => {
+                const games = JSON.parse(localStorage.getItem('games')) || [];
+                games.splice(index, 1);
+                localStorage.setItem('games', JSON.stringify(games));
+                loadGames();
+            };
+
+            const editGame = (index) => {
+                const games = JSON.parse(localStorage.getItem('games')) || [];
+                const game = games[index];
+                gameTitle.value = game.title;
+                gameImage.value = game.image;
+                gameDescription.value = game.description;
+                gameRating.value = game.rating;
+                gameGenre.value = game.genre;
+                gameModal.classList.remove('hidden');
+
+                gameForm.onsubmit = (e) => {
+                    e.preventDefault();
+                    games[index] = {
+                        title: gameTitle.value,
+                        image: gameImage.value,
+                        description: gameDescription.value,
+                        rating: gameRating.value,
+                        genre: gameGenre.value
+                    };
+                    localStorage.setItem('games', JSON.stringify(games));
+                    loadGames();
+                    gameModal.classList.add('hidden');
+                };
+            };
+
+            const searchGames = (query) => {
+                const games = JSON.parse(localStorage.getItem('games')) || [];
+                const filteredGames = games.filter(game => game.title.toLowerCase().includes(query.toLowerCase()));
+                gameList.innerHTML = '';
+                filteredGames.forEach((game, index) => {
+                    const gameItem = document.createElement('div');
+                    gameItem.className = 'bg-gray-800 p-4 rounded-lg led-box-shadow hover-led-box-shadow';
+                    gameItem.innerHTML = `
+                        <img src="${game.image}" alt="Cover image of ${game.title}" class="w-full h-48 object-cover rounded mb-4 led-box-shadow hover-led-box-shadow">
+                        <h3 class="text-xl font-bold mb-2">${game.title}</h3>
+                        <p class="mb-2">${game.description}</p>
+                        <p class="mb-2">Rating: ${game.rating}/5</p>
+                        <p class="mb-2">Genre: ${game.genre}</p>
+                        <div class="flex justify-between items-center">
+                            <button class="bg-red-500 text-black px-4 py-2 rounded led-box-shadow hover-led-box-shadow" onclick="deleteGame(${index})">Delete</button>
+                            <button class="bg-blue-500 text-black px-4 py-2 rounded led-box-shadow hover-led-box-shadow" onclick="editGame(${index})">Edit</button>
+                        </div>
+                    `;
+                    gameList.appendChild(gameItem);
+                });
+            };
+
+            addGameBtn.addEventListener('click', () => {
+                gameModal.classList.remove('hidden');
+                gameForm.onsubmit = (e) => {
+                    e.preventDefault();
+                    saveGame(gameTitle.value, gameImage.value, gameDescription.value, gameRating.value, gameGenre.value);
+                    gameTitle.value = '';
+                    gameImage.value = '';
+                    gameDescription.value = '';
+                    gameRating.value = '';
+                    gameGenre.value = '';
+                    gameModal.classList.add('hidden');
+                };
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                gameModal.classList.add('hidden');
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                searchGames(e.target.value);
+            });
+
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                loadGames();
+            });
+
+            backToDashboardBtn.addEventListener('click', () => {
+                window.location.href = 'maindashboard.html'; // Replace with the actual URL of your dashboard
+            });
+
+            // Preload some games for demonstration
+            const preloadGames = () => {
+                const games = [
+                    {
+                        title: "The Legend of Zelda: Breath of the Wild",
+                        image: "https://placehold.co/300x400?text=The+Legend+of+Zelda:+Breath+of+the+Wild",
+                        description: "An open-world adventure game set in the kingdom of Hyrule.",
+                        rating: 5,
+                        genre: "Action-Adventure"
+                    },
+                    {
+                        title: "Super Mario Odyssey",
+                        image: "https://placehold.co/300x400?text=Super+Mario+Odyssey",
+                        description: "A 3D platformer where Mario travels across various worlds to save Princess Peach.",
+                        rating: 5,
+                        genre: "Platformer"
+                    },
+                    {
+                        title: "Animal Crossing: New Horizons",
+                        image: "https://placehold.co/300x400?text=Animal+Crossing:+New+Horizons",
+                        description: "A life simulation game where you develop a deserted island into a community.",
+                        rating: 4,
+                        genre: "Simulation"
+                    },
+                    {
+                        title: "The Witcher 3: Wild Hunt",
+                        image: "https://placehold.co/300x400?text=The+Witcher+3:+Wild+Hunt",
+                        description: "An open-world RPG where you play as Geralt of Rivia, a monster hunter.",
+                        rating: 5,
+                        genre: "RPG"
+                    },
+                    {
+                        title: "Red Dead Redemption 2",
+                        image: "https://placehold.co/300x400?text=Red+Dead+Redemption+2",
+                        description: "An open-world western action-adventure game set in the late 1800s.",
+                        rating: 5,
+                        genre: "Action-Adventure"
+                    },
+                    {
+                        title: "Cyberpunk 2077",
+                        image: "https://placehold.co/300x400?text=Cyberpunk+2077",
+                        description: "An open-world RPG set in a dystopian future.",
+                        rating: 4,
+                        genre: "RPG"
+                    },
+                    {
+                        title: "Minecraft",
+                        image: "https://placehold.co/300x400?text=Minecraft",
+                        description: "A sandbox game where you can build and explore your own worlds.",
+                        rating: 5,
+                        genre: "Sandbox"
+                    },
+                    {
+                        title: "Fortnite",
+                        image: "https://placehold.co/300x400?text=Fortnite",
+                        description: "A battle royale game where you fight to be the last one standing.",
+                        rating: 4,
+                        genre: "Battle Royale"
+                    },
+                    {
+                        title: "Call of Duty: Warzone",
+                        image: "https://placehold.co/300x400?text=Call+of+Duty:+Warzone",
+                        description: "A battle royale game set in the Call of Duty universe.",
+                        rating: 4,
+                        genre: "Battle Royale"
+                    },
+                    {
+                        title: "Among Us",
+                        image: "https://placehold.co/300x400?text=Among+Us",
+                        description: "A multiplayer game where you work together to complete tasks while identifying impostors.",
+                        rating: 4,
+                        genre: "Multiplayer"
+                    },
+                    {
+                        title: "Hades",
+                        image: "https://placehold.co/300x400?text=Hades",
+                        description: "A rogue-like dungeon crawler where you fight your way out of the Underworld.",
+                        rating: 5,
+                        genre: "Rogue-like"
+                    },
+                    {
+                        title: "Ghost of Tsushima",
+                        image: "https://placehold.co/300x400?text=Ghost+of+Tsushima",
+                        description: "An open-world action-adventure game set in feudal Japan.",
+                        rating: 5,
+                        genre: "Action-Adventure"
+                    },
+                    {
+                        title: "Doom Eternal",
+                        image: "https://placehold.co/300x400?text=Doom+Eternal",
+                        description: "A first-person shooter where you fight demons from Hell.",
+                        rating: 4,
+                        genre: "FPS"
+                    },
+                    {
+                        title: "Final Fantasy VII Remake",
+                        image: "https://placehold.co/300x400?text=Final+Fantasy+VII+Remake",
+                        description: "A remake of the classic RPG with modern graphics and gameplay.",
+                        rating: 5,
+                        genre: "RPG"
+                    },
+                    {
+                        title: "Persona 5",
+                        image: "https://placehold.co/300x400?text=Persona+5",
+                        description: "A JRPG where you lead a group of high school students with supernatural powers.",
+                        rating: 5,
+                        genre: "JRPG"
+                    }
+                ];
+                localStorage.setItem('games', JSON.stringify(games));
+                loadGames();
+            };
+
+            preloadGames();
+
+            // Expose deleteGame function to global scope
+            window.deleteGame = deleteGame;
+            window.editGame = editGame;
+        });
+    </script>
+</body>
+</html>

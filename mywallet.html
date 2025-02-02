@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Wallet</title>
+  <style>
+    /* General Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #000000; /* Pure black for AMOLED */
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #bb86fc; /* Vibrant purple for headings */
+}
+
+h2 {
+  color: #03dac6; /* Vibrant teal for subheadings */
+}
+
+/* Tabs Navigation */
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  background-color: #1f1f1f; /* Dark gray for buttons */
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border-radius: 5px;
+  margin: 0 5px;
+}
+
+.tab-button.active {
+  background-color: #bb86fc; /* Vibrant purple for active tab */
+  color: #000000; /* Black text for contrast */
+}
+
+.tab-button:hover {
+  background-color: #333333; /* Slightly lighter gray on hover */
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Wallet Section */
+.wallet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.wallet-form input,
+.wallet-form button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #1f1f1f; /* Dark gray for inputs */
+  color: #ffffff;
+}
+
+.wallet-form button {
+  background-color: #bb86fc; /* Vibrant purple for buttons */
+  color: #000000; /* Black text for contrast */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.wallet-form button:hover {
+  background-color: #9a67ea; /* Slightly darker purple on hover */
+}
+
+.transactions-list {
+  margin-top: 20px;
+}
+
+.transaction-card {
+  background-color: #1f1f1f; /* Dark gray for cards */
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.transaction-card.income {
+  border-left: 5px solid #03dac6; /* Vibrant teal for income */
+}
+
+.transaction-card.expense {
+  border-left: 5px solid #ff6b6b; /* Vibrant red for expenses */
+}
+
+.transaction-card button {
+  background-color: #ff6b6b; /* Vibrant red for delete buttons */
+  border: none;
+  color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.transaction-card button:hover {
+  background-color: #ff4c4c; /* Slightly darker red on hover */
+}
+
+.totals {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  background-color: #1f1f1f; /* Dark gray for totals section */
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.totals p {
+  margin: 0;
+}
+
+/* Password Manager Section */
+.credentials-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.credentials-form input,
+.credentials-form button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #1f1f1f; /* Dark gray for inputs */
+  color: #ffffff;
+}
+
+.credentials-form button {
+  background-color: #bb86fc; /* Vibrant purple for buttons */
+  color: #000000; /* Black text for contrast */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.credentials-form button:hover {
+  background-color: #9a67ea; /* Slightly darker purple on hover */
+}
+
+.credentials-list {
+  margin-top: 20px;
+}
+
+.credential-card {
+  background-color: #1f1f1f; /* Dark gray for cards */
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.credential-card button {
+  background-color: #ff6b6b; /* Vibrant red for delete buttons */
+  border: none;
+  color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.credential-card button:hover {
+  background-color: #ff4c4c; /* Slightly darker red on hover */
+}
+
+/* Back to Home Button */
+.back-to-home {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #bb86fc; /* Vibrant purple for button */
+  color: #000000; /* Black text for contrast */
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.back-to-home:hover {
+  background-color: #9a67ea; /* Slightly darker purple on hover */
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>InfoHub</h1>
+    <h2>My Wallet</h2>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+      <button class="tab-button active" data-tab="wallet">Wallet</button>
+      <button class="tab-button" data-tab="credentials">Credentials</button>
+    </div>
+
+    <!-- Wallet Section -->
+    <div id="wallet" class="tab-content active">
+      <h2>Wallet</h2>
+      <form class="wallet-form">
+        <input type="text" id="description" placeholder="Description" required>
+        <input type="number" id="amount" placeholder="Amount" required>
+        <input type="date" id="date" required>
+        <button type="submit">Add Transaction</button>
+      </form>
+
+      <div class="transactions-list">
+        <!-- Transactions will be dynamically added here -->
+      </div>
+
+      <div class="totals">
+        <p>Total Balance: <span id="total-balance">$0.00</span></p>
+        <p>Total Income: <span id="total-income">$0.00</span></p>
+        <p>Total Expenses: <span id="total-expenses">$0.00</span></p>
+      </div>
+    </div>
+
+    <!-- Password Manager Section -->
+    <div id="credentials" class="tab-content">
+      <h2>Password Manager</h2>
+      <form class="credentials-form">
+        <input type="text" id="platform" placeholder="Platform Name" required>
+        <input type="text" id="username" placeholder="Username/Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit">Save Credential</button>
+      </form>
+
+      <div class="credentials-list">
+        <!-- Credentials will be dynamically added here -->
+      </div>
+    </div>
+
+    <!-- Back to Home Button -->
+    <a href="maindashboard.html" class="back-to-home">Back to Home</a>
+  </div>
+
+  <script>
+    // Local Storage Keys
+    const TRANSACTIONS_KEY = 'transactions';
+    const CREDENTIALS_KEY = 'credentials';
+
+    // DOM Elements
+    const walletForm = document.querySelector('.wallet-form');
+    const transactionsList = document.querySelector('.transactions-list');
+    const totalBalance = document.getElementById('total-balance');
+    const totalIncome = document.getElementById('total-income');
+    const totalExpenses = document.getElementById('total-expenses');
+
+    const credentialsForm = document.querySelector('.credentials-form');
+    const credentialsList = document.querySelector('.credentials-list');
+
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Load data from local storage
+    let transactions = JSON.parse(localStorage.getItem(TRANSACTIONS_KEY)) || [];
+    let credentials = JSON.parse(localStorage.getItem(CREDENTIALS_KEY)) || [];
+
+    // Render transactions and credentials on page load
+    renderTransactions();
+    renderCredentials();
+    updateTotals();
+
+    // Wallet Form Submission
+    walletForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const description = document.getElementById('description').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const date = document.getElementById('date').value;
+
+      if (description && amount && date) {
+        const transaction = { description, amount, date };
+        transactions.push(transaction);
+        localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
+        renderTransactions();
+        updateTotals();
+        walletForm.reset();
+      }
+    });
+
+    // Credentials Form Submission
+    credentialsForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const platform = document.getElementById('platform').value;
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      if (platform && username && password) {
+        const credential = {
+          platform,
+          username,
+          password: btoa(password), // Base64 encoding for demonstration
+        };
+        credentials.push(credential);
+        localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(credentials));
+        renderCredentials();
+        credentialsForm.reset();
+      }
+    });
+
+    // Render Transactions
+    function renderTransactions() {
+      transactionsList.innerHTML = '';
+      transactions.forEach((transaction, index) => {
+        const transactionCard = document.createElement('div');
+        transactionCard.classList.add('transaction-card');
+        transactionCard.classList.add(transaction.amount > 0 ? 'income' : 'expense');
+
+        transactionCard.innerHTML = `
+          <div>
+            <p><strong>${transaction.description}</strong></p>
+            <p>Amount: $${transaction.amount.toFixed(2)}</p>
+            <p>Date: ${transaction.date}</p>
+          </div>
+          <button onclick="deleteTransaction(${index})">Delete</button>
+        `;
+        transactionsList.appendChild(transactionCard);
+      });
+    }
+
+    // Render Credentials
+    function renderCredentials() {
+      credentialsList.innerHTML = '';
+      credentials.forEach((credential, index) => {
+        const credentialCard = document.createElement('div');
+        credentialCard.classList.add('credential-card');
+
+        credentialCard.innerHTML = `
+          <div>
+            <p><strong>${credential.platform}</strong></p>
+            <p>Username/Email: ${credential.username}</p>
+            <p>Password: ${atob(credential.password)}</p> <!-- Base64 decoding for demonstration -->
+          </div>
+          <button onclick="deleteCredential(${index})">Delete</button>
+        `;
+        credentialsList.appendChild(credentialCard);
+      });
+    }
+
+    // Update Totals
+    function updateTotals() {
+      const total = transactions.reduce((sum, t) => sum + t.amount, 0);
+      const income = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+      const expenses = transactions.filter(t => t.amount < 0).reduce((sum, t) => sum + t.amount, 0);
+
+      totalBalance.textContent = `$${total.toFixed(2)}`;
+      totalIncome.textContent = `$${income.toFixed(2)}`;
+      totalExpenses.textContent = `$${Math.abs(expenses).toFixed(2)}`;
+    }
+
+    // Delete Transaction
+    function deleteTransaction(index) {
+      transactions.splice(index, 1);
+      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
+      renderTransactions();
+      updateTotals();
+    }
+
+    // Delete Credential
+    function deleteCredential(index) {
+      credentials.splice(index, 1);
+      localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(credentials));
+      renderCredentials();
+    }
+
+    // Tab Navigation
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tab = button.dataset.tab;
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById(tab).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

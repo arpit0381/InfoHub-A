@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <head>
+  <title>
+   InfoHub
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;family=Pacifico&amp;display=swap" rel="stylesheet"/>
+  <script>
+   function saveDetails() {
+            const name = document.getElementById('name').value;
+            const details = document.getElementById('details').value;
+            localStorage.setItem('name', name);
+            localStorage.setItem('details', details);
+            alert('Details saved successfully!');
+        }
+
+        function loadDetails() {
+            const name = localStorage.getItem('name');
+            const details = localStorage.getItem('details');
+            if (name && details) {
+                document.getElementById('name').value = name;
+                document.getElementById('details').value = details;
+            }
+        }
+
+        window.onload = loadDetails;
+
+        function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('hidden');
+}
+
+// Close sidebar when clicking outside
+document.addEventListener("click", function (event) {
+    const sidebar = document.getElementById("sidebar");
+    const toggleButton = document.querySelector(".fa-bars");
+
+    // Check if click is outside the sidebar and the button
+    if (!sidebar.contains(event.target) && !toggleButton.contains(event.target)) {
+        sidebar.classList.add("hidden");
+    }
+});
+
+        function updateClock() {
+            const now = new Date();
+            const secondHand = document.querySelector('.second-hand');
+            const minuteHand = document.querySelector('.minute-hand');
+            const hourHand = document.querySelector('.hour-hand');
+
+            const seconds = now.getSeconds();
+            const minutes = now.getMinutes();
+            const hours = now.getHours();
+
+            const secondsDegrees = ((seconds / 60) * 360) + 90;
+            const minutesDegrees = ((minutes / 60) * 360) + ((seconds / 60) * 6) + 90;
+            const hoursDegrees = ((hours / 12) * 360) + ((minutes / 60) * 30) + 90;
+
+            secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
+            minuteHand.style.transform = `rotate(${minutesDegrees}deg)`;
+            hourHand.style.transform = `rotate(${hoursDegrees}deg)`;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+  </script>
+  <style>
+   .clock {
+            width: 200px;
+            height: 200px;
+            border: 10px solid white;
+            border-radius: 50%;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .clock-face {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform: translateY(-3px);
+        }
+
+        .hand {
+            width: 50%;
+            height: 6px;
+            background: white;
+            position: absolute;
+            top: 50%;
+            transform-origin: 100%;
+            transform: rotate(90deg);
+            transition: all 0.05s;
+            transition-timing-function: cubic-bezier(0.1, 2.7, 0.58, 1);
+        }
+
+        .second-hand {
+            height: 2px;
+            background: red;
+        }
+        .led-box-shadow {
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+        }
+  </style>
+ </head>
+ <body class="bg-gray-900 text-white font-sans">
+  <div class="min-h-screen flex flex-col md:flex-row ">
+   <!-- Mobile Header -->
+   <div class="md:hidden flex justify-between items-center p-4 bg-gray-800 fixed top-0 left-0 right-0 z-10 led-box-shadow">
+    <h1 class="text-2xl font-bold" style="font-family: 'Pacifico', cursive;">
+     InfoHub
+    </h1>
+    <button class="text-gray-300 focus:outline-none" onclick="toggleSidebar()">
+     <i class="fas fa-bars">
+     </i>
+    </button>
+   </div>
+   <!-- Sidebar -->
+   <div class="w-full md:w-64 bg-gray-800 p-4 hidden md:block fixed md:relative top-0 left-0 md:top-auto md:left-auto z-10 led-box-shadow" id="sidebar">
+    <div class="flex items-center mb-4">
+     <img alt="InfoHub logo with a stylized 'I' and 'H' in vibrant colors" class="w-12 h-12 mr-2" src="Dinfo.jpg"/>
+     <h2 class="text-2xl font-bold" style="font-family: 'Pacifico', cursive;">
+      InfoHub
+     </h2>
+    </div>
+    <h2 class="text-2xl font-bold mb-4">
+     Features
+    </h2>
+    <ul>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="todo.html">
+       <i class="fas fa-list-ul mr-2">
+       </i>
+       Todo List
+      </a>
+     </li>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="notes.html">
+       <i class="fas fa-sticky-note mr-2">
+       </i>
+       Notes
+      </a>
+     </li>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="mywallet.html">
+       <i class="fas fa-wallet mr-2">
+       </i>
+       My Wallet
+      </a>
+     </li>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="mylab.html">
+       <i class="fas fa-book mr-2">
+       </i>
+       My Library
+      </a>
+     </li>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="mywork.html">
+       <i class="fas fa-briefcase mr-2">
+       </i>
+       My Work
+      </a>
+     </li>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="calander.html">
+       <i class="fas fa-calendar-alt mr-2">
+       </i>
+       Calendar
+      </a>
+     </li>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="codesave.html">
+       <i class="fas fa-code mr-2">
+       </i>
+       Code Storage
+      </a>
+     </li>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="resumebuilder.html">
+       <i class="fas fa-book mr-2">
+       </i>
+       Resume Builder
+      </a>
+     </li>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="moviecollection.html">
+       <i class="fas fa-film mr-2">
+       </i>
+       Movie Collection
+      </a>
+     </li>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="gamelib.html">
+       <i class="fas fa-gamepad mr-2">
+       </i>
+       Game Library
+      </a>
+     </li>
+     <li class="mb-2">
+      <a class="text-gray-300 hover:text-white" href="#">
+       <i class="fas fa-ellipsis-h mr-2">
+       </i>
+       More Features
+      </a>
+     </li>
+     <a class="w-full p-2 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none text-center block" href="index.html" id="back-to-dashboard-link">
+        Logout
+       </a>
+    </ul>
+   </div>
+   <!-- Main Content -->
+   <div class="flex-1 p-4 md:p-8 mt-16 md:mt-0">
+    <h1 class="text-3xl md:text-4xl font-bold mb-4 md:mb-8" style="font-family: 'Pacifico', cursive;">
+     Welcome to InfoHub
+    </h1>
+    <div class="bg-gray-800 p-4 md:p-6 rounded-lg shadow-lg mb-8 ">
+     <h2 class="text-xl md:text-2xl font-bold mb-4">
+      Enter Your Details
+     </h2>
+     <form>
+      <div class="mb-4">
+       <label class="block text-gray-300 mb-2" for="name">
+        Name
+       </label>
+       <input class="w-full p-2 bg-gray-700 text-white rounded" id="name" placeholder="Enter your name" type="text"/>
+      </div>
+      <div class="mb-4">
+       <label class="block text-gray-300 mb-2" for="details">
+        Details
+       </label>
+       <textarea class="w-full p-2 bg-gray-700 text-white rounded" id="details" placeholder="Enter your details"></textarea>
+      </div>
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="saveDetails()" type="button">
+       Save
+      </button>
+     </form>
+    </div>
+    <!-- Description Section -->
+    <div class="bg-gray-800 p-4 md:p-6 rounded-lg shadow-lg mb-8">
+     <h2 class="text-2xl font-bold mb-4" style="font-family: 'Pacifico', cursive;">
+      About InfoHub
+     </h2>
+     <p class="text-gray-300" style="font-family: 'Roboto', sans-serif;">
+      InfoHub is your one-stop solution for managing all your personal and professional information. 
+                    From to-do lists and notes to managing your wallet and library, InfoHub provides a comprehensive 
+                    suite of tools to keep you organized and productive. Whether you're tracking your work tasks, 
+                    storing code snippets, or managing your music and movie collections, InfoHub has got you covered.
+     </p>
+    </div>
+    <!-- Real-time Analog Clock -->
+    <div class="bg-gray-800 p-4 md:p-6 rounded-lg shadow-lg mb-8">
+     <h2 class="text-2xl font-bold mb-4" style="font-family: 'Pacifico', cursive;">
+      Real-time Analog Clock
+     </h2>
+     <div class="clock">
+      <div class="clock-face">
+       <div class="hand hour-hand">
+       </div>
+       <div class="hand minute-hand">
+       </div>
+       <div class="hand second-hand">
+       </div>
+      </div>
+     </div>
+    </div>
+    <!-- Additional Features Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+     <a class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center hover:bg-gray-700" href="https://weather.com/en-IN/weather/today/l/Sachendi+Urf+Chacheri+Uttar+Pradesh?canonicalCityId=0547c7b834ba2138e05350d998321e6b6ea3cbe0653201230f5f7a2fcfbddb7f">
+      <img alt="Weather icon" class="w-12 h-12 mr-4" src="images/meteorology.png"/>
+      <div>
+       <h3 class="text-lg font-bold mb-2">
+        Weather Updates
+       </h3>
+       <p class="text-gray-300">
+        Stay updated with the latest weather information for your location.
+       </p>
+      </div>
+     </a>
+     <a class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center hover:bg-gray-700" href="https://timesofindia.indiatimes.com/">
+      <img alt="News icon" class="w-12 h-12 mr-4" src="images/publication.png"/>
+      <div>
+       <h3 class="text-lg font-bold mb-2">
+        News Feed
+       </h3>
+       <p class="text-gray-300">
+        Get the latest news updates from around the world.
+       </p>
+      </div>
+     </a>
+     <a class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center hover:bg-gray-700" href="https://www.myfitnesspal.com/">
+      <img alt="Fitness icon" class="w-12 h-12 mr-4" src="images/diet.png"/>
+      <div>
+       <h3 class="text-lg font-bold mb-2">
+        Fitness Tracker
+       </h3>
+       <p class="text-gray-300">
+        Track your fitness activities and stay healthy.
+       </p>
+      </div>
+     </a>
+     <a class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center hover:bg-gray-700" href="https://www.101cookbooks.com/">
+      <img alt="Recipe book icon" class="w-12 h-12 mr-4" src="images/book.png"/>
+      <div>
+       <h3 class="text-lg font-bold mb-2">
+        Recipe Book
+       </h3>
+       <p class="text-gray-300">
+        Store and manage your favorite recipes.
+       </p>
+      </div>
+     </a>
+     <a class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center hover:bg-gray-700" href="https://wanderlog.com/">
+      <img alt="Travel planner icon" class="w-12 h-12 mr-4" src="images/traveling.png"/>
+      <div>
+       <h3 class="text-lg font-bold mb-2">
+        Travel Planner 
+       </h3>
+       <p class="text-gray-300">
+        Plan your trips and manage your travel itineraries.
+       </p>
+      </div>
+     </a>
+     <a class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center hover:bg-gray-700" href="mywallet.html">
+      <img alt="Expense tracker icon" class="w-12 h-12 mr-4" src="images/accounting.png"/>
+      <div>
+       <h3 class="text-lg font-bold mb-2">
+        Expense Tracker
+       </h3>
+       <p class="text-gray-300">
+        Keep track of your expenses and manage your budget.
+       </p>
+      </div>
+     </a>
+     <a class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center hover:bg-gray-700" href="calander.html">
+      <img alt="Habit tracker icon" class="w-12 h-12 mr-4" src="images/travelling.png"/>
+      <div>
+       <h3 class="text-lg font-bold mb-2">
+        Habit Tracker
+       </h3>
+       <p class="text-gray-300">
+        Build and track your habits to improve your daily routine.
+       </p>
+      </div>
+     </a>
+     <a class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center hover:bg-gray-700" href="mylab.html">
+      <img alt="Bookmarks manager icon" class="w-12 h-12 mr-4" src="images/management.png"/>
+      <div>
+       <h3 class="text-lg font-bold mb-2">
+        Bookmarks Manager
+       </h3>
+       <p class="text-gray-300">
+        Save and organize your favorite web links.
+       </p>
+      </div>
+     </a>
+     <a class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center hover:bg-gray-700" href="contact.html">
+      <img alt="Contact manager icon" class="w-12 h-12 mr-4" src="images/man.png"/>
+      <div>
+       <h3 class="text-lg font-bold mb-2">
+        Contact Manager
+       </h3>
+       <p class="text-gray-300">
+        Store and manage your personal and professional contacts.
+       </p>
+      </div>
+     </a>
+     <a class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center hover:bg-gray-700" href="mywallet.html">
+      <img alt="Password manager icon" class="w-12 h-12 mr-4" src="images/password-manager.png"/>
+      <div>
+       <h3 class="text-lg font-bold mb-2">
+        Password Manager
+       </h3>
+       <p class="text-gray-300">
+        Securely store and manage your passwords.
+       </p>
+      </div>
+     </a>
+    </div>
+   </div>
+  </div>
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-center py-4 mt-8 led-box-shadow">
+   <p class="text-gray-400">
+    © 2025 InfoHub by Arpit Bajpai
+   </p>
+  </footer>
+ </body>
+</html>

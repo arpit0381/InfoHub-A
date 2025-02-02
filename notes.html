@@ -1,0 +1,302 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   InfoHub Notes App
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap&amp;family=Pacifico&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .led-shadow {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3), 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+  </style>
+ </head>
+ <body class="bg-black text-white">
+  <div class="container mx-auto p-4">
+   <header class="flex justify-between items-center mb-4">
+    <div class="flex items-center">
+        <img alt="InfoHub logo with a stylized 'I' and 'H' in vibrant colors" class="w-12 h-12 mr-2" src="images/notes.png"/>
+     <h1 class="text-3xl font-bold" style="font-family: 'Pacifico', cursive;">
+      InfoHub
+     </h1>
+    </div>
+    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-sm" onclick="window.location.href='maindashboard.html'">
+     <i class="fas fa-arrow-left">
+     </i>
+     Back to Dashboard
+    </button>
+   </header>
+   <nav class="mb-4">
+    <ul class="flex space-x-4">
+     <li>
+      <button class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded" onclick="filterNotes('all')">
+       All Notes
+      </button>
+     </li>
+     <li>
+      <button class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded" onclick="filterNotes('pinned')">
+       Pinned
+      </button>
+     </li>
+     <li>
+      <button class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded" onclick="filterNotes('archived')">
+       Archived
+      </button>
+     </li>
+     <li>
+      <button class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded" onclick="filterNotes('reminders')">
+       Reminders
+      </button>
+     </li>
+     
+    </ul>
+   </nav>
+   <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold">
+     Notes
+    </h2>
+    <div class="flex space-x-4">
+     <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full text-sm" onclick="exportNotes()">
+      <i class="fas fa-file-export">
+      </i>
+      Export Notes
+     </button>
+     <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full text-sm" onclick="clearAllNotes()">
+      <i class="fas fa-trash-alt">
+      </i>
+      Clear All Notes
+     </button>
+    </div>
+   </div>
+   <main class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="notesContainer">
+    <!-- Notes will be dynamically added here -->
+   </main>
+   <button class="fixed bottom-8 right-8 bg-green-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full text-xl" id="addNoteBtn">
+    <i class="fas fa-plus">
+    </i>
+   </button>
+   
+  </div>
+  
+  <!-- Note Template -->
+  <template id="noteTemplate">
+   <div class="bg-gray-800 p-3 rounded-lg shadow-lg led-shadow">
+    <input class="w-full bg-transparent text-white border-none focus:outline-none text-lg mb-2" placeholder="Title" type="text"/>
+    <div class="w-full bg-transparent text-white border-none focus:outline-none resize-none note-content" contenteditable="true" placeholder="Start typing..." style="min-height: 80px;">
+    </div>
+    <div class="flex justify-between items-center mt-2">
+     <button class="deleteNoteBtn text-red-500 hover:text-red-700">
+      <i class="fas fa-trash">
+      </i>
+     </button>
+     <button class="saveNoteBtn text-green-500 hover:text-green-700">
+      <i class="fas fa-save">
+      </i>
+     </button>
+     <button class="editNoteBtn text-yellow-500 hover:text-yellow-700">
+      <i class="fas fa-edit">
+      </i>
+     </button>
+     <button class="pinNoteBtn text-blue-500 hover:text-blue-700">
+      <i class="fas fa-thumbtack">
+      </i>
+     </button>
+     <button class="archiveNoteBtn text-purple-500 hover:text-purple-700">
+      <i class="fas fa-archive">
+      </i>
+     </button>
+     <button class="colorNoteBtn text-pink-500 hover:text-pink-700">
+      <i class="fas fa-palette">
+      </i>
+     </button>
+     <button class="reminderNoteBtn text-orange-500 hover:text-orange-700">
+      <i class="fas fa-bell">
+      </i>
+     </button>
+     <button class="shareNoteBtn text-teal-500 hover:text-teal-700">
+      <i class="fas fa-share-alt">
+      </i>
+     </button>
+     <button class="lockNoteBtn text-gray-500 hover:text-gray-700">
+      <i class="fas fa-lock">
+      </i>
+     </button>
+    </div>
+    
+   </div>
+  
+  
+  </template>
+  
+ 
+  <script>
+   document.addEventListener('DOMContentLoaded', () => {
+    const notesContainer = document.getElementById('notesContainer');
+    const addNoteBtn = document.getElementById('addNoteBtn');
+    const noteTemplate = document.getElementById('noteTemplate').content;
+    
+    // Load notes from local storage
+    const loadNotes = () => {
+        const notes = JSON.parse(localStorage.getItem('notes')) || [];
+        notesContainer.innerHTML = ""; // Clear existing notes before loading
+
+        notes.forEach(note => {
+            const noteElement = createNoteElement(note);
+            notesContainer.appendChild(noteElement);
+        });
+    };
+
+    // Save notes to local storage
+    const saveNotes = () => {
+        const notes = [];
+        notesContainer.querySelectorAll('.bg-gray-800').forEach(noteElement => {
+            notes.push(getNoteData(noteElement));
+        });
+        localStorage.setItem('notes', JSON.stringify(notes));
+    };
+
+    // Get note data from element
+    const getNoteData = (noteElement) => ({
+        title: noteElement.querySelector('input').value,
+        content: noteElement.querySelector('.note-content').innerHTML,
+        pinned: noteElement.querySelector('.pinNoteBtn').classList.contains('text-yellow-500'),
+        archived: noteElement.querySelector('.archiveNoteBtn').classList.contains('text-gray-500'),
+        color: noteElement.style.backgroundColor || '',
+        reminder: noteElement.querySelector('.reminderNoteBtn').classList.contains('text-orange-500'),
+        locked: noteElement.querySelector('.lockNoteBtn').classList.contains('text-gray-700'),
+    });
+
+    // Create note element from data
+    const createNoteElement = (note) => {
+        const noteElement = document.importNode(noteTemplate, true);
+        const container = noteElement.querySelector('.bg-gray-800');
+        
+        container.querySelector('input').value = note.title;
+        container.querySelector('.note-content').innerHTML = note.content;
+        container.style.backgroundColor = note.color;
+
+        if (note.pinned) container.querySelector('.pinNoteBtn').classList.add('text-yellow-500');
+        if (note.archived) container.querySelector('.archiveNoteBtn').classList.add('text-gray-500');
+        if (note.reminder) container.querySelector('.reminderNoteBtn').classList.add('text-orange-500');
+        if (note.locked) {
+            container.querySelector('.lockNoteBtn').classList.add('text-gray-700');
+            container.querySelector('.note-content').setAttribute('contenteditable', 'false');
+        }
+
+        return container;
+    };
+
+    // Add new note
+    addNoteBtn.addEventListener('click', () => {
+        const noteElement = createNoteElement({ title: '', content: '', pinned: false, archived: false, color: '', reminder: false, locked: false });
+        notesContainer.appendChild(noteElement);
+        saveNotes();
+    });
+
+    // Event delegation for all note buttons
+    notesContainer.addEventListener('click', (e) => {
+        const noteElement = e.target.closest('.bg-gray-800');
+        if (!noteElement) return;
+
+        if (e.target.closest('.saveNoteBtn')) saveNotes();
+        if (e.target.closest('.deleteNoteBtn')) {
+            noteElement.remove();
+            saveNotes();
+        }
+        if (e.target.closest('.editNoteBtn')) {
+            noteElement.querySelector('input').focus();
+        }
+        if (e.target.closest('.pinNoteBtn')) {
+            e.target.closest('.pinNoteBtn').classList.toggle('text-yellow-500');
+            saveNotes();
+        }
+        if (e.target.closest('.archiveNoteBtn')) {
+            e.target.closest('.archiveNoteBtn').classList.toggle('text-gray-500');
+            saveNotes();
+        }
+        if (e.target.closest('.colorNoteBtn')) {
+            const newColor = prompt("Enter a color (e.g., #ff0000 or red):", "#ff0000");
+            if (newColor) {
+                noteElement.style.backgroundColor = newColor;
+                saveNotes();
+            }
+        }
+        if (e.target.closest('.reminderNoteBtn')) {
+            const reminderTime = prompt("Enter reminder time (YYYY-MM-DDTHH:MM):", "");
+            if (reminderTime) {
+                const timeUntilReminder = new Date(reminderTime).getTime() - new Date().getTime();
+                if (timeUntilReminder > 0) {
+                    setTimeout(() => alert(`Reminder: ${noteElement.querySelector('input').value}`), timeUntilReminder);
+                    noteElement.querySelector('.reminderNoteBtn').classList.add('text-orange-500');
+                    saveNotes();
+                } else {
+                    alert("Invalid reminder time.");
+                }
+            }
+        }
+        if (e.target.closest('.shareNoteBtn')) {
+            const title = noteElement.querySelector('input').value;
+            const content = noteElement.querySelector('.note-content').innerHTML;
+            navigator.share({ title, text: content }).catch(console.error);
+        }
+        if (e.target.closest('.lockNoteBtn')) {
+            const lockBtn = e.target.closest('.lockNoteBtn');
+            const contentDiv = noteElement.querySelector('.note-content');
+            lockBtn.classList.toggle('text-gray-700');
+            contentDiv.setAttribute('contenteditable', lockBtn.classList.contains('text-gray-700') ? 'false' : 'true');
+            saveNotes();
+        }
+    });
+
+    // Filter notes
+    const filterNotes = (filter) => {
+        notesContainer.querySelectorAll('.bg-gray-800').forEach(note => {
+            const isPinned = note.querySelector('.pinNoteBtn').classList.contains('text-yellow-500');
+            const isArchived = note.querySelector('.archiveNoteBtn').classList.contains('text-gray-500');
+            const hasReminder = note.querySelector('.reminderNoteBtn').classList.contains('text-orange-500');
+
+            note.style.display = 
+                (filter === 'all' || 
+                (filter === 'pinned' && isPinned) ||
+                (filter === 'archived' && isArchived) ||
+                (filter === 'reminders' && hasReminder)) ? 'block' : 'none';
+        });
+    };
+
+    // Export notes
+    const exportNotes = () => {
+        const notes = JSON.parse(localStorage.getItem('notes')) || [];
+        const blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'notes.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    // Clear all notes
+    const clearAllNotes = () => {
+        if (confirm("Are you sure you want to clear all notes?")) {
+            localStorage.removeItem('notes');
+            notesContainer.innerHTML = '';
+        }
+    };
+
+    window.filterNotes = filterNotes;
+    window.exportNotes = exportNotes;
+    window.clearAllNotes = clearAllNotes;
+
+    loadNotes();
+});
+
+  </script>
+ </body>
+</html>

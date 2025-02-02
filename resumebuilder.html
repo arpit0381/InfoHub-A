@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .form-container, .preview-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px 0;
+        }
+        fieldset {
+            border: 1px solid #00bcd4;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+        legend {
+            color: #00bcd4;
+            font-size: 1.2em;
+        }
+        input, textarea, button, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #00bcd4;
+            border-radius: 5px;
+            background-color: #111;
+            color: #fff;
+        }
+        button {
+            background-color: #00bcd4;
+            color: #000;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0097a7;
+        }
+        #resume-preview {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 5px;
+            color: #fff;
+        }
+        .skill-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .skill-container input[type="text"] {
+            flex: 1;
+        }
+        .skill-container input[type="range"] {
+            flex: 2;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .form-container, .preview-container {
+                width: 100%;
+            }
+        }
+        @media print {
+            body {
+                background-color: #fff;
+                color: #000;
+            }
+           
+            button {
+                display: none;
+            }
+        }
+        .theme-toggle {
+            position: top;
+            top: 20px;
+            right: 20px;
+            background-color: #00bcd4;
+            color: #000;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .theme-toggle:hover {
+            background-color: #0097a7;
+        }
+        .light-theme {
+            background-color: #fff;
+            color: #000;
+        }
+        .light-theme fieldset {
+            border-color: #000;
+        }
+        .light-theme legend {
+            color: #000;
+        }
+        .light-theme input, .light-theme textarea, .light-theme button, .light-theme select {
+            background-color: #f9f9f9;
+            color: #000;
+            border-color: #000;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <button class="theme-toggle" id="theme-toggle">Toggle Theme</button>
+        <h1>Resume Builder</h1>
+        <div class="form-container">
+            <form id="resume-form">
+                <!-- Personal Information -->
+                <fieldset>
+                    <legend>Personal Information</legend>
+                    <input type="text" id="name" placeholder="Full Name" required>
+                    <input type="email" id="email" placeholder="Email" required>
+                    <input type="tel" id="phone" placeholder="Phone Number">
+                    <input type="text" id="linkedin" placeholder="LinkedIn Profile">
+                    <input type="text" id="github" placeholder="GitHub Profile">
+                    <input type="file" id="profile-picture" accept="image/*">
+                </fieldset>
+
+                <!-- Education -->
+                <fieldset>
+                    <legend>Education</legend>
+                    <input type="text" id="school" placeholder="School/College" required>
+                    <input type="text" id="degree" placeholder="Degree" required>
+                    <input type="text" id="field-of-study" placeholder="Field of Study">
+                    <input type="text" id="graduation-year" placeholder="Year of Graduation">
+                </fieldset>
+
+                <!-- Work Experience -->
+                <fieldset>
+                    <legend>Work Experience</legend>
+                    <input type="text" id="company" placeholder="Company Name">
+                    <input type="text" id="job-title" placeholder="Job Title">
+                    <textarea id="responsibilities" placeholder="Responsibilities"></textarea>
+                    <input type="text" id="duration" placeholder="Duration">
+                </fieldset>
+
+                <!-- Skills -->
+                <fieldset>
+                    <legend>Skills</legend>
+                    <div id="skills-container">
+                        <div class="skill-container">
+                            <input type="text" class="skill" placeholder="Skill">
+                            <input type="range" class="proficiency" min="0" max="100" value="50">
+                        </div>
+                    </div>
+                    <button type="button" id="add-skill">Add Skill</button>
+                </fieldset>
+
+                <!-- Projects -->
+                <fieldset>
+                    <legend>Projects</legend>
+                    <input type="text" id="project-title" placeholder="Project Title">
+                    <textarea id="project-description" placeholder="Project Description"></textarea>
+                    <input type="text" id="project-duration" placeholder="Duration">
+                </fieldset>
+
+                <!-- Certifications -->
+                <fieldset>
+                    <legend>Certifications</legend>
+                    <input type="text" id="certification-name" placeholder="Certification Name">
+                    <input type="text" id="certification-issuer" placeholder="Issuer">
+                    <input type="text" id="certification-date" placeholder="Date">
+                </fieldset>
+
+                <!-- Languages -->
+                <fieldset>
+                    <legend>Languages</legend>
+                    <input type="text" id="language" placeholder="Language">
+                    <select id="language-proficiency">
+                        <option value="basic">Basic</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                        <option value="native">Native</option>
+                    </select>
+                </fieldset>
+
+                <!-- Hobbies -->
+                <fieldset>
+                    <legend>Hobbies</legend>
+                    <textarea id="hobbies" placeholder="Hobbies"></textarea>
+                </fieldset>
+
+                <!-- References -->
+                <fieldset>
+                    <legend>References</legend>
+                    <input type="text" id="reference-name" placeholder="Reference Name">
+                    <input type="text" id="reference-email" placeholder="Reference Email">
+                    <input type="text" id="reference-phone" placeholder="Reference Phone">
+                </fieldset>
+
+                <!-- Achievements -->
+                <fieldset>
+                    <legend>Achievements</legend>
+                    <textarea id="achievements" placeholder="Achievements"></textarea>
+                </fieldset>
+
+                <!-- <button type="submit">Save Resume</button> -->
+                <button type="button" id="clear-data">Clear All Data</button>
+            </form>
+        </div>
+
+        <div class="preview-container">
+            <h2>Resume Preview</h2>
+            <div id="resume-preview"></div>
+            <button type="button" id="export-pdf">Export as PDF</button>
+            <button type="button" id="print-resume">Print Resume</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('resume-form');
+            const preview = document.getElementById('resume-preview');
+            const addSkillButton = document.getElementById('add-skill');
+            const clearDataButton = document.getElementById('clear-data');
+            const exportPdfButton = document.getElementById('export-pdf');
+            const printResumeButton = document.getElementById('print-resume');
+            const skillsContainer = document.getElementById('skills-container');
+            const themeToggleButton = document.getElementById('theme-toggle');
+
+            loadSavedData();
+
+            form.addEventListener('input', () => {
+                updatePreview();
+                saveData();
+            });
+
+            addSkillButton.addEventListener('click', () => {
+                const skillContainer = document.createElement('div');
+                skillContainer.className = 'skill-container';
+
+                const newSkill = document.createElement('input');
+                newSkill.type = 'text';
+                newSkill.className = 'skill';
+                newSkill.placeholder = 'Skill';
+
+                const newProficiency = document.createElement('input');
+                newProficiency.type = 'range';
+                newProficiency.className = 'proficiency';
+                newProficiency.min = '0';
+                newProficiency.max = '100';
+                newProficiency.value = '50';
+
+                skillContainer.appendChild(newSkill);
+                skillContainer.appendChild(newProficiency);
+                skillsContainer.appendChild(skillContainer);
+            });
+
+            clearDataButton.addEventListener('click', () => {
+                localStorage.clear();
+                form.reset();
+                preview.innerHTML = '';
+                skillsContainer.innerHTML = '<div class="skill-container"><input type="text" class="skill" placeholder="Skill"><input type="range" class="proficiency" min="0" max="100" value="50"></div>';
+            });
+
+            exportPdfButton.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                let resumeText = document.getElementById('resume-preview').innerText;
+                doc.setFontSize(12);
+                doc.text(resumeText, 10, 10);
+                doc.save('resume.pdf');
+            });
+
+            printResumeButton.addEventListener('click', () => {
+                window.print();
+            });
+
+            themeToggleButton.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+            });
+
+            function updatePreview() {
+                const formData = new FormData(form);
+                let previewHTML = '<h2>Resume Preview</h2>';
+
+                for (let [key, value] of formData.entries()) {
+                    if (value.trim() !== '') {
+                        previewHTML += `<p><strong>${key.replace(/-/g, ' ')}:</strong> ${value}</p>`;
+                    }
+                }
+
+                const skillInputs = document.querySelectorAll('.skill');
+                const proficiencyInputs = document.querySelectorAll('.proficiency');
+                if (skillInputs.length > 0) {
+                    previewHTML += '<h3>Skills</h3>';
+                    skillInputs.forEach((skill, index) => {
+                        if (skill.value.trim() !== '') {
+                            previewHTML += `<p><strong>${skill.value}:</strong> ${proficiencyInputs[index].value}%</p>`;
+                        }
+                    });
+                }
+
+                preview.innerHTML = previewHTML;
+            }
+
+            function saveData() {
+                const formData = new FormData(form);
+                const data = {};
+
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+
+                const skillInputs = document.querySelectorAll('.skill');
+                const proficiencyInputs = document.querySelectorAll('.proficiency');
+                const skills = [];
+                skillInputs.forEach((skill, index) => {
+                    skills.push({
+                        skill: skill.value,
+                        proficiency: proficiencyInputs[index].value
+                    });
+                });
+
+                data.skills = skills;
+
+                localStorage.setItem('resumeData', JSON.stringify(data));
+            }
+
+            function loadSavedData() {
+                const savedData = JSON.parse(localStorage.getItem('resumeData'));
+
+                if (savedData) {
+                    for (let key in savedData) {
+                        if (key === 'skills') {
+                            savedData[key].forEach((skill, index) => {
+                                if (index > 0) {
+                                    addSkillButton.click();
+                                }
+                                const skillInputs = document.querySelectorAll('.skill');
+                                const proficiencyInputs = document.querySelectorAll('.proficiency');
+                                skillInputs[index].value = skill.skill;
+                                proficiencyInputs[index].value = skill.proficiency;
+                            });
+                        } else {
+                            const input = document.getElementById(key);
+                            if (input) {
+                                input.value = savedData[key];
+                            }
+                        }
+                    }
+                    updatePreview();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

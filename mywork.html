@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InfoHub - My Work App</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Body and Container */
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: #111111;
+      padding: 20px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 800px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+
+    /* Header with Logo */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .header img {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+    }
+
+    .header h1 {
+      color: #1e90ff;
+      font-size: 2rem;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input, select, button, textarea {
+      padding: 10px;
+      border: 1px solid #333333;
+      border-radius: 5px;
+      background-color: #222222;
+      color: #ffffff;
+    }
+
+    button {
+      background-color: #1e90ff;
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0077cc;
+    }
+
+    /* Work List */
+    #workList {
+      list-style-type: none;
+    }
+
+    .work-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid #333333;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      background-color: #222222;
+      transition: transform 0.2s ease;
+    }
+
+    .work-item:hover {
+      transform: scale(1.02);
+    }
+
+    .work-item.completed {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
+
+    .work-item span {
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+
+    .work-item button {
+      background-color: #ff4444;
+      border: none;
+      border-radius: 5px;
+      color: #ffffff;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    .work-item button:hover {
+      background-color: #cc0000;
+    }
+
+    .priority-high {
+      color: #ff4444;
+    }
+
+    .priority-medium {
+      color: #ffcc00;
+    }
+
+    .priority-low {
+      color: #1e90ff;
+    }
+
+    /* Filter and Sort Controls */
+    .filter-sort-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      background-color: #333333;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .progress {
+      height: 10px;
+      background-color: #1e90ff;
+      border-radius: 5px;
+    }
+
+    /* Task Count */
+    .task-count {
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    /* Back to Home Button */
+    .home-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #1e90ff;
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .home-btn:hover {
+      background-color: #0077cc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header with Logo -->
+    <div class="header">
+      <img src="images/working.png" alt="InfoHub Logo">
+      <h1>InfoHub</h1>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <input type="text" id="workInput" placeholder="Enter your work...">
+      <input type="date" id="dueDateInput">
+      <select id="categoryInput">
+        <option value="work">Work</option>
+        <option value="personal">Personal</option>
+        <option value="shopping">Shopping</option>
+      </select>
+      <select id="priorityInput">
+        <option value="low">Low Priority</option>
+        <option value="medium">Medium Priority</option>
+        <option value="high">High Priority</option>
+      </select>
+      <select id="recurrenceInput">
+        <option value="none">No Recurrence</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+      <textarea id="notesInput" placeholder="Add notes..."></textarea>
+      <input type="file" id="attachmentInput" accept=".pdf,.jpg,.png">
+      <button id="addWorkBtn">Add Work</button>
+    </div>
+
+    <!-- Filter and Sort Controls -->
+    <div class="filter-sort-controls">
+      <select id="filterPriority">
+        <option value="all">All Priorities</option>
+        <option value="high">High Priority</option>
+        <option value="medium">Medium Priority</option>
+        <option value="low">Low Priority</option>
+      </select>
+      <button id="sortByDateBtn">Sort by Due Date</button>
+      <button id="exportTasksBtn">Export Tasks</button>
+      <button id="importTasksBtn">Import Tasks</button>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress" id="progressBar"></div>
+    </div>
+
+    <!-- Task Count -->
+    <div class="task-count">
+      Total Tasks: <span id="totalTasks">0</span> | Completed Tasks: <span id="completedTasks">0</span>
+    </div>
+
+    <!-- Work List -->
+    <ul id="workList"></ul>
+
+    <!-- Back to Home Button -->
+    <button id="backToHomeBtn" class="home-btn">Back to Home</button>
+
+    <!-- Footer -->
+    <div class="footer">
+      InfoHub by Arpit Bajpai
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const workInput = document.getElementById('workInput');
+    const dueDateInput = document.getElementById('dueDateInput');
+    const categoryInput = document.getElementById('categoryInput');
+    const priorityInput = document.getElementById('priorityInput');
+    const recurrenceInput = document.getElementById('recurrenceInput');
+    const notesInput = document.getElementById('notesInput');
+    const attachmentInput = document.getElementById('attachmentInput');
+    const addWorkBtn = document.getElementById('addWorkBtn');
+    const workList = document.getElementById('workList');
+    const filterPriority = document.getElementById('filterPriority');
+    const sortByDateBtn = document.getElementById('sortByDateBtn');
+    const exportTasksBtn = document.getElementById('exportTasksBtn');
+    const importTasksBtn = document.getElementById('importTasksBtn');
+    const progressBar = document.getElementById('progressBar');
+    const totalTasks = document.getElementById('totalTasks');
+    const completedTasks = document.getElementById('completedTasks');
+    const backToHomeBtn = document.getElementById('backToHomeBtn');
+
+    // Load saved work from localStorage
+    let works = JSON.parse(localStorage.getItem('works')) || [];
+
+    // Render works
+    function renderWorks(filteredWorks = works) {
+      workList.innerHTML = '';
+      filteredWorks.forEach((work, index) => {
+        const li = document.createElement('li');
+        li.className = `work-item ${work.completed ? 'completed' : ''}`;
+        li.innerHTML = `
+          <span class="priority-${work.priority}">${work.text} (Due: ${work.dueDate}, Category: ${work.category}, Recurrence: ${work.recurrence})</span>
+          <span>${work.notes}</span>
+          <button onclick="toggleComplete(${index})">${work.completed ? 'Undo' : 'Complete'}</button>
+          <button onclick="deleteWork(${index})">Delete</button>
+        `;
+        workList.appendChild(li);
+      });
+      updateProgress();
+    }
+
+    // Add work
+    addWorkBtn.addEventListener('click', () => {
+      const text = workInput.value.trim();
+      const dueDate = dueDateInput.value;
+      const category = categoryInput.value;
+      const priority = priorityInput.value;
+      const recurrence = recurrenceInput.value;
+      const notes = notesInput.value.trim();
+      const attachment = attachmentInput.files[0];
+      if (text && dueDate) {
+        works.push({ text, dueDate, category, priority, recurrence, notes, attachment, completed: false });
+        localStorage.setItem('works', JSON.stringify(works));
+        workInput.value = '';
+        dueDateInput.value = '';
+        notesInput.value = '';
+        attachmentInput.value = '';
+        renderWorks();
+      }
+    });
+
+    // Delete work
+    function deleteWork(index) {
+      if (confirm('Are you sure you want to delete this work?')) {
+        works.splice(index, 1);
+        localStorage.setItem('works', JSON.stringify(works));
+        renderWorks();
+      }
+    }
+
+    // Toggle complete
+    function toggleComplete(index) {
+      works[index].completed = !works[index].completed;
+      localStorage.setItem('works', JSON.stringify(works));
+      renderWorks();
+    }
+
+    // Filter by priority
+    filterPriority.addEventListener('change', () => {
+      const priority = filterPriority.value;
+      const filteredWorks = priority === 'all' ? works : works.filter(work => work.priority === priority);
+      renderWorks(filteredWorks);
+    });
+
+    // Sort by due date
+    sortByDateBtn.addEventListener('click', () => {
+      works.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      renderWorks();
+    });
+
+    // Export tasks
+    exportTasksBtn.addEventListener('click', () => {
+      const dataStr = JSON.stringify(works);
+      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+      const exportFileDefaultName = 'tasks.json';
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    });
+
+    // Import tasks
+    importTasksBtn.addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          works = JSON.parse(e.target.result);
+          localStorage.setItem('works', JSON.stringify(works));
+          renderWorks();
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    });
+
+    // Update progress bar
+    function updateProgress() {
+      const total = works.length;
+      const completed = works.filter(work => work.completed).length;
+      progressBar.style.width = total === 0 ? '0%' : `${(completed / total) * 100}%`;
+      totalTasks.textContent = total;
+      completedTasks.textContent = completed;
+    }
+
+    // Back to Home Button
+    backToHomeBtn.addEventListener('click', () => {
+      window.location.href = 'maindashboard.html'; // Replace with your home URL
+    });
+
+    // Initial render
+    renderWorks();
+  </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Todo List - InfoHub
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .logo-font {
+            font-family: 'Pacifico', cursive;
+        }
+  </style>
+  <script>
+   document.addEventListener('DOMContentLoaded', () => {
+            const todoInput = document.getElementById('todo-input');
+            const todoList = document.getElementById('todo-list');
+            const addTodoButton = document.getElementById('add-todo-button');
+            const clearAllButton = document.getElementById('clear-all-button');
+            const filterSelect = document.getElementById('filter-select');
+            const searchInput = document.getElementById('search-input');
+            const sortSelect = document.getElementById('sort-select');
+
+            const loadTodos = () => {
+                const todos = JSON.parse(localStorage.getItem('todos')) || [];
+                todos.forEach(todo => addTodoToDOM(todo));
+            };
+
+            const saveTodos = (todos) => {
+                localStorage.setItem('todos', JSON.stringify(todos));
+            };
+
+            const addTodoToDOM = (todo) => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center p-2 border-b border-gray-700';
+                li.innerHTML = `
+                    <span class="${todo.completed ? 'line-through' : ''}">${todo.text}</span>
+                    <div>
+                        <button class="text-green-500 mr-2" onclick="toggleTodoStatus(this)">
+                            <i class="fas fa-${todo.completed ? 'undo' : 'check'}"></i>
+                        </button>
+                        <button class="text-red-500" onclick="removeTodoFromDOM(this)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                todoList.appendChild(li);
+            };
+
+            const addTodo = () => {
+                const todoText = todoInput.value.trim();
+                if (todoText) {
+                    const todo = { text: todoText, completed: false };
+                    addTodoToDOM(todo);
+                    const todos = JSON.parse(localStorage.getItem('todos')) || [];
+                    todos.push(todo);
+                    saveTodos(todos);
+                    todoInput.value = '';
+                }
+            };
+
+            const removeTodoFromDOM = (button) => {
+                const li = button.parentElement.parentElement;
+                const todoText = li.firstChild.textContent;
+                li.remove();
+                const todos = JSON.parse(localStorage.getItem('todos')) || [];
+                const updatedTodos = todos.filter(todo => todo.text !== todoText);
+                saveTodos(updatedTodos);
+            };
+
+            const clearAllTodos = () => {
+                localStorage.removeItem('todos');
+                todoList.innerHTML = '';
+            };
+
+            const filterTodos = () => {
+                const filter = filterSelect.value;
+                const todos = JSON.parse(localStorage.getItem('todos')) || [];
+                todoList.innerHTML = '';
+                todos.forEach(todo => {
+                    if (filter === 'all' || (filter === 'completed' && todo.completed) || (filter === 'pending' && !todo.completed)) {
+                        addTodoToDOM(todo);
+                    }
+                });
+            };
+
+            const toggleTodoStatus = (button) => {
+                const li = button.parentElement.parentElement;
+                const todoText = li.firstChild.textContent;
+                const todos = JSON.parse(localStorage.getItem('todos')) || [];
+                const updatedTodos = todos.map(todo => {
+                    if (todo.text === todoText) {
+                        todo.completed = !todo.completed;
+                    }
+                    return todo;
+                });
+                saveTodos(updatedTodos);
+                filterTodos();
+            };
+
+            const searchTodos = () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const todos = JSON.parse(localStorage.getItem('todos')) || [];
+                todoList.innerHTML = '';
+                todos.forEach(todo => {
+                    if (todo.text.toLowerCase().includes(searchTerm)) {
+                        addTodoToDOM(todo);
+                    }
+                });
+            };
+
+            const sortTodos = () => {
+                const sort = sortSelect.value;
+                const todos = JSON.parse(localStorage.getItem('todos')) || [];
+                if (sort === 'alphabetical') {
+                    todos.sort((a, b) => a.text.localeCompare(b.text));
+                } else if (sort === 'reverse') {
+                    todos.sort((a, b) => b.text.localeCompare(a.text));
+                }
+                todoList.innerHTML = '';
+                todos.forEach(todo => addTodoToDOM(todo));
+            };
+
+            addTodoButton.addEventListener('click', addTodo);
+            todoInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addTodo();
+                }
+            });
+            clearAllButton.addEventListener('click', clearAllTodos);
+            filterSelect.addEventListener('change', filterTodos);
+            searchInput.addEventListener('input', searchTodos);
+            sortSelect.addEventListener('change', sortTodos);
+
+            loadTodos();
+        });
+
+        function removeTodoFromDOM(button) {
+            const li = button.parentElement.parentElement;
+            const todoText = li.firstChild.textContent;
+            li.remove();
+            const todos = JSON.parse(localStorage.getItem('todos')) || [];
+            const updatedTodos = todos.filter(todo => todo.text !== todoText);
+            localStorage.setItem('todos', JSON.stringify(updatedTodos));
+        }
+
+        function toggleTodoStatus(button) {
+            const li = button.parentElement.parentElement;
+            const todoText = li.firstChild.textContent;
+            const todos = JSON.parse(localStorage.getItem('todos')) || [];
+            const updatedTodos = todos.map(todo => {
+                if (todo.text === todoText) {
+                    todo.completed = !todo.completed;
+                }
+                return todo;
+            });
+            localStorage.setItem('todos', JSON.stringify(updatedTodos));
+            filterTodos();
+        }
+  </script>
+ </head>
+ <body class="bg-black text-white min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-sm mx-auto p-4">
+   <div class="text-center mb-4">
+    
+    <h1 class="text-4xl font-bold logo-font">
+     InfoHub
+    </h1>
+   </div>
+   <h2 class="text-2xl font-semibold text-center mb-4">
+    Todo List
+   </h2>
+   <div class="flex mb-4">
+    <input class="flex-grow p-2 rounded-l bg-gray-800 text-white border border-gray-700 focus:outline-none" id="todo-input" placeholder="Add a new todo" type="text"/>
+    <button class="p-2 bg-blue-500 text-white rounded-r hover:bg-blue-600 focus:outline-none" id="add-todo-button">
+     <i class="fas fa-plus">
+     </i>
+    </button>
+   </div>
+   <div class="flex justify-between mb-4">
+    <select class="p-2 bg-gray-800 text-white border border-gray-700 rounded focus:outline-none" id="filter-select">
+     <option value="all">
+      All
+     </option>
+     <option value="completed">
+      Completed
+     </option>
+     <option value="pending">
+      Pending
+     </option>
+    </select>
+    <button class="p-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none" id="clear-all-button">
+     Clear All
+    </button>
+   </div>
+   <div class="mb-4">
+    <input class="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none" id="search-input" placeholder="Search todos" type="text"/>
+   </div>
+   <div class="flex justify-between mb-4">
+    <select class="p-2 bg-gray-800 text-white border border-gray-700 rounded focus:outline-none" id="sort-select">
+     <option value="default">
+      Sort By
+     </option>
+     <option value="alphabetical">
+      Alphabetical
+     </option>
+     <option value="reverse">
+      Reverse Alphabetical
+     </option>
+    </select>
+   </div>
+   <ul class="bg-gray-900 rounded p-2 mb-4" id="todo-list">
+    <!-- Todo items will be appended here -->
+   </ul>
+   <a class="w-full p-2 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none text-center block" href="maindashboard.html" id="back-to-dashboard-link">
+    Back to Dashboard
+   </a>
+   <!-- Footer -->
+  <footer class="bg-gray-800 text-center py-4 mt-8">
+    <p class="text-gray-400">
+     © 2024 InfoHub by Arpit Bajpai
+    </p>
+   </footer>
+  </div>
+  
+ </body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMOLED Calendar</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Arial', sans-serif; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+    .container { width: 95%; background: #111; border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(255, 64, 129, 0.2); }
+    h1 { text-align: center; color: #FF4081; margin-bottom: 10px; font-size: 1.5em; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .header button { background: #FF4081; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
+    .header button:hover { background: #ff1a5e; }
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .day { background: #1a1a1a; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.9em; position: relative; }
+    .day:hover { background: #FF4081; color: #000; }
+    .event, .task, .weather { padding: 3px; border-radius: 3px; margin-top: 3px; font-size: 0.8em; }
+    .event { background: #FF4081; cursor: grab; }
+    .event:active { cursor: grabbing; }
+    .task { background: #00bcd4; }
+    .weather { background: #4caf50; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); justify-content: center; align-items: center; }
+    .modal-content { background: #111; padding: 15px; border-radius: 8px; width: 90%; max-width: 300px; text-align: center; }
+    .modal-content input, .modal-content textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #FF4081; border-radius: 4px; background: #1a1a1a; color: #fff; font-size: 0.9em; }
+    .modal-content button { background: #FF4081; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9em; margin: 5px; }
+    .modal-content button:hover { background: #ff1a5e; }
+    .back-to-home { position: fixed; top: 10px; left: 10px; background: #FF4081; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
+    .back-to-home:hover { background: #ff1a5e; }
+  </style>
+</head>
+<body>
+  <button class="back-to-home" onclick="window.location.href='maindashboard.html'">Back</button>
+  <div class="container">
+    <h1>Calendar</h1>
+    <div class="header">
+      <button onclick="prevMonth()">Prev</button>
+      <h2 id="monthYear"></h2>
+      <button onclick="nextMonth()">Next</button>
+    </div>
+    <div class="calendar" id="calendar"></div>
+  </div>
+
+  <!-- Modal for Event Creation -->
+  <div class="modal" id="eventModal">
+    <div class="modal-content">
+      <h2>Create Event</h2>
+      <input type="text" id="eventTitle" placeholder="Event Title">
+      <textarea id="eventDescription" placeholder="Event Description"></textarea>
+      <button onclick="saveEvent()">Save</button>
+      <button onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const calendar = document.getElementById('calendar');
+    const eventModal = document.getElementById('eventModal');
+    const monthYear = document.getElementById('monthYear');
+    let currentDate = new Date();
+    let selectedDay = null;
+    let draggedEvent = null;
+    const events = JSON.parse(localStorage.getItem('events')) || {};
+
+    function generateCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      monthYear.textContent = `${new Intl.DateTimeFormat('en-US', { month: 'long' }).format(currentDate)} ${year}`;
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDay = firstDay.getDay();
+
+      calendar.innerHTML = '';
+      for (let i = 0; i < startingDay; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'day empty';
+        calendar.appendChild(emptyDay);
+      }
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const day = document.createElement('div');
+        day.className = 'day';
+        day.textContent = i;
+        day.addEventListener('click', () => openModal(i));
+        day.addEventListener('dragover', (e) => e.preventDefault());
+        day.addEventListener('drop', () => moveEvent(i));
+        const dateKey = `${year}-${month + 1}-${i}`;
+        if (events[dateKey]) {
+          events[dateKey].forEach(event => {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event';
+            eventDiv.textContent = event.title;
+            eventDiv.draggable = true;
+            eventDiv.addEventListener('dragstart', () => dragEvent(event, dateKey));
+            day.appendChild(eventDiv);
+          });
+        }
+        calendar.appendChild(day);
+      }
+    }
+
+    function openModal(day) {
+      selectedDay = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${day}`;
+      eventModal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      eventModal.style.display = 'none';
+    }
+
+    function saveEvent() {
+      const title = document.getElementById('eventTitle').value;
+      const description = document.getElementById('eventDescription').value;
+      if (!title) return;
+
+      const event = { title, description };
+      if (!events[selectedDay]) {
+        events[selectedDay] = [];
+      }
+      events[selectedDay].push(event);
+      localStorage.setItem('events', JSON.stringify(events));
+      generateCalendar();
+      closeModal();
+    }
+
+    function dragEvent(event, dateKey) {
+      draggedEvent = { event, dateKey };
+    }
+
+    function moveEvent(newDay) {
+      if (!draggedEvent) return;
+
+      const { event, dateKey } = draggedEvent;
+      const newDateKey = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${newDay}`;
+      events[dateKey] = events[dateKey].filter(e => e.title !== event.title);
+      if (!events[newDateKey]) {
+        events[newDateKey] = [];
+      }
+      events[newDateKey].push(event);
+      localStorage.setItem('events', JSON.stringify(events));
+      generateCalendar();
+    }
+
+    function prevMonth() {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      generateCalendar();
+    }
+
+    function nextMonth() {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      generateCalendar();
+    }
+
+    generateCalendar();
+  </script>
+</body>
+</html>

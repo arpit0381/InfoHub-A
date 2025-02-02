@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Snippet</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/theme/ambiance.min.css">
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background-color: #111;
+      padding: 20px;
+      border-right: 1px solid #333;
+    }
+
+    .sidebar h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    #new-snippet {
+      width: 100%;
+      padding: 10px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    #new-snippet:hover {
+      background-color: #444;
+    }
+
+    .search input {
+      width: 100%;
+      padding: 10px;
+      background-color: #222;
+      border: 1px solid #333;
+      color: #fff;
+    }
+
+    .folders ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .folders li {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .folders li:hover {
+      background-color: #333;
+      transform: translateX(10px);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      background-color: #000;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    header h2 {
+      margin: 0;
+    }
+
+    .actions button, .actions select {
+      padding: 10px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .actions button:hover, .actions select:hover {
+      background-color: #444;
+    }
+
+    .editor {
+      margin-bottom: 20px;
+    }
+
+    .CodeMirror {
+      height: 300px;
+      background-color: #111;
+      color: #fff;
+      border: 1px solid #333;
+    }
+
+    .notes textarea {
+      width: 100%;
+      height: 100px;
+      background-color: #111;
+      color: #fff;
+      border: 1px solid #333;
+      padding: 10px;
+    }
+
+    /* Light Mode */
+    body.light-mode {
+      background-color: #fff;
+      color: #000;
+    }
+
+    body.light-mode .sidebar {
+      background-color: #f5f5f5;
+      border-right: 1px solid #ddd;
+    }
+
+    body.light-mode .CodeMirror {
+      background-color: #f5f5f5;
+      color: #000;
+      border: 1px solid #ddd;
+    }
+
+    body.light-mode .notes textarea {
+      background-color: #f5f5f5;
+      color: #000;
+      border: 1px solid #ddd;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #333;
+      }
+
+      .main-content {
+        padding: 10px;
+      }
+    }
+
+    /* Animations */
+    button, input, textarea, .CodeMirror {
+      transition: all 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .sidebar, .main-content {
+      animation: fadeIn 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h1>Code Snippets</h1>
+      <button id="new-snippet">+ New Snippet</button>
+      <div class="search">
+        <input type="text" id="search-bar" placeholder="Search snippets...">
+      </div>
+      <div class="folders">
+        <ul id="folder-list">
+          <!-- Folders will be dynamically added here -->
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header>
+        <h2 id="snippet-title">Untitled Snippet</h2>
+        <div class="actions">
+          <select id="language-selector">
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+          </select>
+          <button id="save-snippet">Save</button>
+          <button id="delete-snippet">Delete</button>
+          <button id="toggle-theme">Light Mode</button>
+        </div>
+      </header>
+      <div class="editor">
+        <textarea id="code-editor"></textarea>
+      </div>
+      <div class="notes">
+        <h3>Notes</h3>
+        <textarea id="notes-editor" placeholder="Add notes..."></textarea>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/mode/clike/clike.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/mode/css/css.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const codeEditor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+        lineNumbers: true,
+        theme: 'ambiance',
+        mode: 'javascript',
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        indentUnit: 4,
+      });
+
+      const notesEditor = document.getElementById('notes-editor');
+      const saveButton = document.getElementById('save-snippet');
+      const newSnippetButton = document.getElementById('new-snippet');
+      const deleteButton = document.getElementById('delete-snippet');
+      const searchBar = document.getElementById('search-bar');
+      const folderList = document.getElementById('folder-list');
+      const toggleThemeButton = document.getElementById('toggle-theme');
+      const languageSelector = document.getElementById('language-selector');
+
+      let snippets = JSON.parse(localStorage.getItem('snippets')) || [];
+      let currentSnippet = null;
+
+      // Language modes
+      const languageModes = {
+        javascript: 'javascript',
+        python: 'python',
+        cpp: 'text/x-c++src',
+        java: 'text/x-java',
+        html: 'htmlmixed',
+        css: 'css',
+      };
+
+      // Load snippets into the sidebar
+      function loadSnippets() {
+        folderList.innerHTML = '';
+        snippets.forEach((snippet, index) => {
+          const li = document.createElement('li');
+          li.textContent = snippet.title || 'Untitled Snippet';
+          li.dataset.index = index;
+          li.addEventListener('click', () => loadSnippet(index));
+          folderList.appendChild(li);
+        });
+      }
+
+      // Load a specific snippet
+      async function loadSnippet(index) {
+        currentSnippet = index;
+        const snippet = snippets[index];
+
+        if (snippet.encrypted) {
+          const password = prompt('Enter password to decrypt:');
+          if (password) {
+            try {
+              snippet.code = await decryptData(snippet.code, password);
+              snippet.notes = await decryptData(snippet.notes, password);
+            } catch (error) {
+              alert('Incorrect password or corrupted data.');
+              return;
+            }
+          } else {
+            return;
+          }
+        }
+
+        codeEditor.setValue(snippet.code || '');
+        notesEditor.value = snippet.notes || '';
+        document.getElementById('snippet-title').textContent = snippet.title || 'Untitled Snippet';
+        languageSelector.value = snippet.language || 'javascript';
+        codeEditor.setOption('mode', languageModes[snippet.language || 'javascript']);
+      }
+
+      // Save snippet
+      saveButton.addEventListener('click', async () => {
+        const title = prompt('Enter a title for the snippet:') || 'Untitled Snippet';
+        const password = prompt('Enter a password to encrypt (leave blank for no encryption):');
+        let encryptedCode = codeEditor.getValue();
+        let encryptedNotes = notesEditor.value;
+
+        if (password) {
+          try {
+            encryptedCode = await encryptData(encryptedCode, password);
+            encryptedNotes = await encryptData(encryptedNotes, password);
+          } catch (error) {
+            alert('Encryption failed. Please try again.');
+            return;
+          }
+        }
+
+        const snippet = {
+          title,
+          code: encryptedCode,
+          notes: encryptedNotes,
+          language: languageSelector.value,
+          encrypted: !!password,
+          versions: [],
+        };
+
+        if (currentSnippet !== null) {
+          snippets[currentSnippet].versions.push({
+            code: snippets[currentSnippet].code,
+            notes: snippets[currentSnippet].notes,
+            timestamp: new Date().toISOString(),
+          });
+          snippets[currentSnippet] = snippet;
+        } else {
+          snippets.push(snippet);
+        }
+
+        localStorage.setItem('snippets', JSON.stringify(snippets));
+        loadSnippets();
+      });
+
+      // New snippet
+      newSnippetButton.addEventListener('click', () => {
+        currentSnippet = null;
+        codeEditor.setValue('');
+        notesEditor.value = '';
+        document.getElementById('snippet-title').textContent = 'Untitled Snippet';
+      });
+
+      // Delete snippet
+      deleteButton.addEventListener('click', () => {
+        if (currentSnippet !== null) {
+          snippets.splice(currentSnippet, 1);
+          localStorage.setItem('snippets', JSON.stringify(snippets));
+          loadSnippets();
+          currentSnippet = null;
+          codeEditor.setValue('');
+          notesEditor.value = '';
+          document.getElementById('snippet-title').textContent = 'Untitled Snippet';
+        }
+      });
+
+      // Search snippets
+      searchBar.addEventListener('input', () => {
+        const query = searchBar.value.toLowerCase();
+        folderList.innerHTML = '';
+        snippets.forEach((snippet, index) => {
+          if (
+            snippet.title.toLowerCase().includes(query) ||
+            snippet.code.toLowerCase().includes(query) ||
+            snippet.notes.toLowerCase().includes(query)
+          ) {
+            const li = document.createElement('li');
+            li.textContent = snippet.title || 'Untitled Snippet';
+            li.dataset.index = index;
+            li.addEventListener('click', () => loadSnippet(index));
+            folderList.appendChild(li);
+          }
+        });
+      });
+
+      // Toggle theme
+      toggleThemeButton.addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        toggleThemeButton.textContent = document.body.classList.contains('light-mode') ? 'Dark Mode' : 'Light Mode';
+      });
+
+      // Encryption function
+      async function encryptData(data, password) {
+        const encoder = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey(
+          'raw',
+          encoder.encode(password),
+          { name: 'PBKDF2' },
+          false,
+          ['deriveKey']
+        );
+        const key = await crypto.subtle.deriveKey(
+          {
+            name: 'PBKDF2',
+            salt: new Uint8Array(16),
+            iterations: 100000,
+            hash: 'SHA-256',
+          },
+          keyMaterial,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encrypted = await crypto.subtle.encrypt(
+          { name: 'AES-GCM', iv },
+          key,
+          encoder.encode(data)
+        );
+        return JSON.stringify({ iv: Array.from(iv), encrypted: Array.from(new Uint8Array(encrypted)) });
+      }
+
+      // Decryption function
+      async function decryptData(encryptedData, password) {
+        try {
+          const parsedData = JSON.parse(encryptedData);
+          const iv = new Uint8Array(parsedData.iv);
+          const encrypted = new Uint8Array(parsedData.encrypted);
+          const encoder = new TextEncoder();
+          const keyMaterial = await crypto.subtle.importKey(
+            'raw',
+            encoder.encode(password),
+            { name: 'PBKDF2' },
+            false,
+            ['deriveKey']
+          );
+          const key = await crypto.subtle.deriveKey(
+            {
+              name: 'PBKDF2',
+              salt: new Uint8Array(16),
+              iterations: 100000,
+              hash: 'SHA-256',
+            },
+            keyMaterial,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['encrypt', 'decrypt']
+          );
+          const decrypted = await crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv },
+            key,
+            encrypted
+          );
+          return new TextDecoder().decode(decrypted);
+        } catch (error) {
+          throw new Error('Decryption failed');
+        }
+      }
+
+      // Initial load
+      loadSnippets();
+    });
+  </script>
+</body>
+</html>

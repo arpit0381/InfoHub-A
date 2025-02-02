@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMOLED Library Management</title>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #1a1a1a;
+            --primary: #00ff88;
+            --text: #ffffff;
+            --secondary-text: #888888;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 1rem;
+            background: var(--surface);
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: var(--text);
+            margin-bottom: 2rem;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .book-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #333;
+            transition: transform 0.2s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .available {
+            background: #00ff8822;
+            color: var(--primary);
+        }
+
+        .borrowed {
+            background: #ff005522;
+            color: #ff0055;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--bg);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            border: 1px solid #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg);
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: var(--text);
+            margin-top: 0.5rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚Library</h1>
+            <button class="btn btn-primary" onclick="openModal()">Add New Book</button>
+        </div>
+
+        <input type="text" class="search-bar" placeholder="Search books..." oninput="searchBooks(this.value)">
+
+        <div class="stats">
+            <div class="stat-box">
+                <h3>Total Books</h3>
+                <p id="totalBooks">0</p>
+            </div>
+            <div class="stat-box">
+                <h3>Available</h3>
+                <p id="availableBooks">0</p>
+            </div>
+            <div class="stat-box">
+                <h3>Borrowed</h3>
+                <p id="borrowedBooks">0</p>
+            </div>
+        </div>
+
+        <div class="books-grid" id="booksContainer"></div>
+
+        <div id="bookModal" class="modal">
+            <div class="modal-content">
+                <form onsubmit="saveBook(event)">
+                    <div class="form-group">
+                        <input type="text" id="bookTitle" placeholder="Book Title" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="bookAuthor" placeholder="Author" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="bookPages" placeholder="Number of Pages" required>
+                    </div>
+                    <div class="form-group">
+                        <select id="bookStatus" required>
+                            <option value="">Select Status</option>
+                            <option value="available">Available</option>
+                            <option value="borrowed">Borrowed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="bookDescription" placeholder="Book Description" rows="4"></textarea>
+                    </div>
+                    <input type="hidden" id="bookId">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Save Book</button>
+                        <button type="button" class="btn" onclick="closeModal()" style="margin-left: 1rem; background: #333; color: var(--text);">Cancel</button>
+                        <button type="button" class="btn" onclick="deleteBook()" id="deleteBtn" style="background: #ff0055; color: white; display: none;">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize books array from localStorage or empty array
+let books = JSON.parse(localStorage.getItem("books")) || [];
+let currentBook = null; // Ensure currentBook is defined globally
+
+// Update statistics
+function updateStats() {
+    document.getElementById("totalBooks").textContent = books.length;
+    document.getElementById("availableBooks").textContent = books.filter(
+        (b) => b.status === "available"
+    ).length;
+    document.getElementById("borrowedBooks").textContent = books.filter(
+        (b) => b.status === "borrowed"
+    ).length;
+}
+
+// Open modal for adding/editing books
+function openModal(bookId = null) {
+    const modal = document.getElementById("bookModal");
+    const deleteBtn = document.getElementById("deleteBtn");
+
+    if (bookId) {
+        currentBook = books.find((b) => b.id === bookId);
+        document.getElementById("bookId").value = currentBook.id;
+        document.getElementById("bookTitle").value = currentBook.title;
+        document.getElementById("bookAuthor").value = currentBook.author;
+        document.getElementById("bookPages").value = currentBook.pages;
+        document.getElementById("bookStatus").value = currentBook.status;
+        document.getElementById("bookDescription").value =
+            currentBook.description || "";
+        deleteBtn.style.display = "inline-block";
+    } else {
+        currentBook = null;
+        document.getElementById("bookId").value = "";
+        document.getElementById("bookTitle").value = "";
+        document.getElementById("bookAuthor").value = "";
+        document.getElementById("bookPages").value = "";
+        document.getElementById("bookStatus").value = "";
+        document.getElementById("bookDescription").value = "";
+        deleteBtn.style.display = "none";
+    }
+
+    modal.style.display = "flex";
+}
+
+// Close modal
+function closeModal() {
+    document.getElementById("bookModal").style.display = "none";
+}
+
+// Save or update book
+function saveBook(e) {
+    e.preventDefault();
+
+    const book = {
+        id: document.getElementById("bookId").value || Date.now().toString(),
+        title: document.getElementById("bookTitle").value.trim(),
+        author: document.getElementById("bookAuthor").value.trim(),
+        pages: document.getElementById("bookPages").value,
+        status: document.getElementById("bookStatus").value,
+        description: document.getElementById("bookDescription").value.trim(),
+        added: new Date().toISOString(),
+    };
+
+    if (!book.title || !book.author || !book.pages || !book.status) {
+        alert("Please fill in all required fields.");
+        return;
+    }
+
+    const index = books.findIndex((b) => b.id === book.id);
+    if (index > -1) {
+        books[index] = book;
+    } else {
+        books.push(book);
+    }
+
+    localStorage.setItem("books", JSON.stringify(books));
+    closeModal();
+    renderBooks();
+    updateStats();
+}
+
+// Delete book
+function deleteBook() {
+    if (!currentBook) return;
+    books = books.filter((b) => b.id !== currentBook.id);
+    localStorage.setItem("books", JSON.stringify(books));
+    closeModal();
+    renderBooks();
+    updateStats();
+}
+
+// Search books
+function searchBooks(query) {
+    query = query.toLowerCase();
+    const filteredBooks = books.filter(
+        (b) =>
+            b.title.toLowerCase().includes(query) ||
+            b.author.toLowerCase().includes(query) ||
+            (b.description && b.description.toLowerCase().includes(query))
+    );
+    renderBooks(filteredBooks);
+}
+
+// Render books
+function renderBooks(booksToRender = books) {
+    const booksContainer = document.getElementById("booksContainer");
+    booksContainer.innerHTML = booksToRender
+        .map(
+            (book) => `
+        <div class="book-card">
+            <h3>${book.title}</h3>
+            <p style="color: var(--secondary-text); margin: 0.5rem 0;">by ${
+                book.author
+            }</p>
+            <p style="font-size: 0.9rem; color: var(--secondary-text);">${
+                book.pages
+            } pages</p>
+            <div class="book-status ${book.status}">${book.status.toUpperCase()}</div>
+            ${
+                book.description
+                    ? `<p style="margin-top: 1rem; color: var(--secondary-text);">${book.description}</p>`
+                    : ""
+            }
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
+                <button class="btn" onclick="openModal('${
+                    book.id
+                }')" style="background: #333; color: var(--text);">Edit</button>
+                <button class="btn" onclick="toggleStatus('${
+                    book.id
+                }')" style="background: ${
+                book.status === "available" ? "var(--primary)" : "#ff0055"
+            };">
+                    ${book.status === "available" ? "Borrow" : "Return"}
+                </button>
+            </div>
+        </div>
+    `
+        )
+        .join("");
+}
+
+// Toggle book status
+function toggleStatus(bookId) {
+    const book = books.find((b) => b.id === bookId);
+    if (book) {
+        book.status = book.status === "available" ? "borrowed" : "available";
+        localStorage.setItem("books", JSON.stringify(books));
+        renderBooks();
+        updateStats();
+    }
+}
+
+// Initial render
+renderBooks();
+updateStats();
+
+// Close modal when clicking outside
+window.onclick = function (e) {
+    const modal = document.getElementById("bookModal");
+    if (e.target === modal) {
+        closeModal();
+    }
+};
+
+    </script>
+</body>
+</html>

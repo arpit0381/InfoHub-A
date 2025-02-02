@@ -1,0 +1,264 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Movie Collection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .led-box-shadow {
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.7), 0 0 20px 4px rgba(255, 255, 255, 0.5), 0 0 30px 6px rgba(255, 255, 255, 0.3);
+        }
+        .hover-effect:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease-in-out;
+        }
+        .hover-bg-effect:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen">
+    <div class="container mx-auto p-4 led-box-shadow">
+        <header class="flex flex-col sm:flex-row justify-between items-center mb-8">
+            <div class="flex items-center mb-4 sm:mb-0">
+                <img alt="InfoHub logo, a stylized 'I' and 'H' intertwined in a modern design" class="mr-4" height="50" src="images/review.png" width="50">
+                <h1 class="text-4xl font-bold">InfoHub</h1>
+            </div>
+            <div class="flex space-x-2">
+                <button id="addItemBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded hover-bg-effect">
+                    <i class="fas fa-plus"></i> Add Item
+                </button>
+                <a href="maindashboard.html" class="bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded hover-bg-effect">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </header>
+
+        <main>
+            <section>
+                <h2 class="text-3xl font-bold mb-4">Movies</h2>
+                <div id="movieList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Movie items will be appended here -->
+                </div>
+            </section>
+
+            <section class="mt-8">
+                <h2 class="text-3xl font-bold mb-4">Web Series</h2>
+                <div id="webSeriesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Web Series items will be appended here -->
+                </div>
+            </section>
+
+            <section class="mt-8">
+                <h2 class="text-3xl font-bold mb-4">Anime</h2>
+                <div id="animeList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Anime items will be appended here -->
+                </div>
+            </section>
+
+            <section class="mt-8">
+                <h2 class="text-3xl font-bold mb-4">Hollywood Serials</h2>
+                <div id="hollywoodSerialsList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Hollywood Serials items will be appended here -->
+                </div>
+            </section>
+
+            <section class="mt-8">
+                <h2 class="text-3xl font-bold mb-4">Top Rated</h2>
+                <div id="topRatedList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Top Rated items will be appended here -->
+                </div>
+            </section>
+
+            <section class="mt-8">
+                <h2 class="text-3xl font-bold mb-4">Recently Added</h2>
+                <div id="recentlyAddedList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Recently Added items will be appended here -->
+                </div>
+            </section>
+
+            <section class="mt-8">
+                <h2 class="text-3xl font-bold mb-4">Favorites</h2>
+                <div id="favoritesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Favorites items will be appended here -->
+                </div>
+            </section>
+        </main>
+
+        <footer class="mt-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center">
+                <p>&copy; 2025 InfoHub by Arpit Bajpai. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal for adding a new item -->
+    <div id="itemModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-gray-900 p-6 rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3 led-box-shadow">
+            <h2 class="text-2xl font-bold mb-4">Add a New Item</h2>
+            <form id="itemForm">
+                <div class="mb-4">
+                    <label for="itemType" class="block text-sm font-bold mb-2">Type</label>
+                    <select id="itemType" class="w-full p-2 rounded bg-gray-800 text-white" required>
+                        <option value="movie">Movie</option>
+                        <option value="webSeries">Web Series</option>
+                        <option value="anime">Anime</option>
+                        <option value="hollywoodSerial">Hollywood Serial</option>
+                        <option value="topRated">Top Rated</option>
+                        <option value="recentlyAdded">Recently Added</option>
+                        <option value="favorites">Favorites</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="itemTitle" class="block text-sm font-bold mb-2">Title</label>
+                    <input type="text" id="itemTitle" class="w-full p-2 rounded bg-gray-800 text-white" required>
+                </div>
+                <div class="mb-4">
+                    <label for="itemDescription" class="block text-sm font-bold mb-2">Description</label>
+                    <textarea id="itemDescription" class="w-full p-2 rounded bg-gray-800 text-white" rows="4" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="itemRating" class="block text-sm font-bold mb-2">Rating</label>
+                    <input type="number" id="itemRating" class="w-full p-2 rounded bg-gray-800 text-white" min="0" max="10" step="0.1" required>
+                </div>
+                <div class="mb-4">
+                    <label for="itemImage" class="block text-sm font-bold mb-2">Image URL</label>
+                    <input type="url" id="itemImage" class="w-full p-2 rounded bg-gray-800 text-white" required>
+                </div>
+                <div class="mb-4">
+                    <label for="itemReleaseDate" class="block text-sm font-bold mb-2">Release Date</label>
+                    <input type="date" id="itemReleaseDate" class="w-full p-2 rounded bg-gray-800 text-white" required>
+                </div>
+                <div class="mb-4">
+                    <label for="itemGenre" class="block text-sm font-bold mb-2">Genre</label>
+                    <input type="text" id="itemGenre" class="w-full p-2 rounded bg-gray-800 text-white" required>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancelBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2 hover-bg-effect">Cancel</button>
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded hover-bg-effect">Add Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const movieList = document.getElementById('movieList');
+            const webSeriesList = document.getElementById('webSeriesList');
+            const animeList = document.getElementById('animeList');
+            const hollywoodSerialsList = document.getElementById('hollywoodSerialsList');
+            const topRatedList = document.getElementById('topRatedList');
+            const recentlyAddedList = document.getElementById('recentlyAddedList');
+            const favoritesList = document.getElementById('favoritesList');
+            const itemModal = document.getElementById('itemModal');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const itemForm = document.getElementById('itemForm');
+            const itemType = document.getElementById('itemType');
+            const itemTitle = document.getElementById('itemTitle');
+            const itemDescription = document.getElementById('itemDescription');
+            const itemRating = document.getElementById('itemRating');
+            const itemImage = document.getElementById('itemImage');
+            const itemReleaseDate = document.getElementById('itemReleaseDate');
+            const itemGenre = document.getElementById('itemGenre');
+
+            const loadItems = () => {
+                const items = JSON.parse(localStorage.getItem('items')) || [];
+                movieList.innerHTML = '';
+                webSeriesList.innerHTML = '';
+                animeList.innerHTML = '';
+                hollywoodSerialsList.innerHTML = '';
+                topRatedList.innerHTML = '';
+                recentlyAddedList.innerHTML = '';
+                favoritesList.innerHTML = '';
+
+                items.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('bg-gray-900', 'p-4', 'rounded-lg', 'led-box-shadow', 'hover-effect');
+                    itemElement.innerHTML = `
+                        <img src="${item.image}" alt="${item.title} poster" class="w-full h-48 object-cover rounded mb-4">
+                        <h3 class="text-xl font-bold mb-2">${item.title}</h3>
+                        <p class="mb-2">${item.description}</p>
+                        <p class="mb-2">Rating: ${item.rating}/10</p>
+                        <p class="mb-2">Release Date: ${item.releaseDate}</p>
+                        <p class="mb-4">Genre: ${item.genre}</p>
+                        <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded hover-bg-effect" onclick="deleteItem(${index})">Delete</button>
+                    `;
+
+                    switch (item.type) {
+                        case 'movie':
+                            movieList.appendChild(itemElement);
+                            break;
+                        case 'webSeries':
+                            webSeriesList.appendChild(itemElement);
+                            break;
+                        case 'anime':
+                            animeList.appendChild(itemElement);
+                            break;
+                        case 'hollywoodSerial':
+                            hollywoodSerialsList.appendChild(itemElement);
+                            break;
+                        case 'topRated':
+                            topRatedList.appendChild(itemElement);
+                            break;
+                        case 'recentlyAdded':
+                            recentlyAddedList.appendChild(itemElement);
+                            break;
+                        case 'favorites':
+                            favoritesList.appendChild(itemElement);
+                            break;
+                    }
+                });
+            };
+
+            const saveItem = (item) => {
+                const items = JSON.parse(localStorage.getItem('items')) || [];
+                items.push(item);
+                localStorage.setItem('items', JSON.stringify(items));
+                loadItems();
+            };
+
+            const deleteItem = (index) => {
+                const items = JSON.parse(localStorage.getItem('items')) || [];
+                items.splice(index, 1);
+                localStorage.setItem('items', JSON.stringify(items));
+                loadItems();
+            };
+
+            window.deleteItem = deleteItem;
+
+            addItemBtn.addEventListener('click', () => {
+                itemModal.classList.remove('hidden');
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                itemModal.classList.add('hidden');
+            });
+
+            itemForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const item = {
+                    type: itemType.value,
+                    title: itemTitle.value,
+                    description: itemDescription.value,
+                    rating: itemRating.value,
+                    image: itemImage.value,
+                    releaseDate: itemReleaseDate.value,
+                    genre: itemGenre.value
+                };
+                saveItem(item);
+                itemModal.classList.add('hidden');
+                itemForm.reset();
+            });
+
+            loadItems();
+        });
+    </script>
+</body>
+</html>
